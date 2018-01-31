@@ -1,5 +1,16 @@
 # <p align='center'>nginx日志监控</p>
 
+<div align="center">
+
+![build status](https://travis-ci.org/fenlan/storm-nginx-log.svg?branch=master)
+[![codebeat badge](https://codebeat.co/badges/cbf116f9-877c-420c-b8c1-1414beb9917a)](https://codebeat.co/projects/github-com-fenlan-storm-nginx-log-master)
+![size](https://github-size-badge.herokuapp.com/fenlan/storm-nginx-log.svg)
+![language](https://img.shields.io/badge/language-java-blue.svg)
+![platform](https://img.shields.io/badge/platform-Linux-orange.svg)
+![progress](http://progressed.io/bar/7?title=completed)
+
+</div>
+
 ## 简单介绍
 项目基于`Kafka` `storm`的实时nginx日志监控，通过读取nginx的日志文件`access.log`来收集nginx服务器的状态，并在一定时间内，统计访问ip的国家地址、指定时间内所有访问次数、访问的状态码、访问的站点、访问者使用的系统、访问者使用的浏览器。
 
