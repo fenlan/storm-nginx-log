@@ -7,10 +7,10 @@ import org.apache.storm.topology.base.BaseRichSpout;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Values;
 
-import java.io.FileNotFoundException;
-import java.io.FileReader;
+
 import java.io.IOException;
-import java.io.LineNumberReader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Map;
 
 public class LogSpout extends BaseRichSpout {
@@ -30,19 +30,17 @@ public class LogSpout extends BaseRichSpout {
     public void nextTuple() {
         long lines = 0;
         String record = null;
-        LineNumberReader lineNumberReader = null;
 
         try {
-            lineNumberReader = new LineNumberReader(new FileReader(srcFile));
-        } catch (FileNotFoundException e) {
+            lines = Files.lines(Paths.get(srcFile)).count();
+        } catch (IOException e) {
             e.printStackTrace();
         }
-        lines = lineNumberReader.lines().count();
         if (lines != index) {
             if (lines < index)      index = 0;
-            for (long i = index + 1; i <= lines; i++) {
+            for (long i = index; i < lines; i++) {
                 try {
-                    record = lineNumberReader.readLine();
+                    record = Files.readAllLines(Paths.get(srcFile)).get((int)i);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
