@@ -7,7 +7,12 @@ import org.apache.storm.topology.base.BaseRichBolt;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Tuple;
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.Pipeline;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -30,8 +35,8 @@ public class SpliteBolt extends BaseRichBolt {
     public void execute(Tuple tuple) {
         long index = tuple.getLong(0);
         String record = tuple.getString(1);
+        Pipeline pipelineq = jedis.pipelined();
 
-        logger.info(index + " : " + record);
         String regx = "([^ ]*) ([^ ]*) ([^ ]*) (\\[.*\\]) (\\\".*?\\\") (-|[0-9]*) (-|[0-9]*) (\\\".*?\\\") (\\\".*?\\\")";
         Pattern pattern = Pattern.compile(regx);
         Matcher matcher = pattern.matcher(record);
@@ -44,8 +49,17 @@ public class SpliteBolt extends BaseRichBolt {
             String body_bytes_sent = matcher.group(7);
             String http_user_agent = matcher.group(9);
 
-            jedis.sadd("remote_addr", remote_addr);
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MMM/yyyy:HH:mm:ss Z", Locale.ENGLISH);
+            LocalDateTime dateTime = LocalDateTime.parse(time_local, formatter);
+            Long milli_time = dateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
 
+            pipelineq.sadd("remote_addr", milli_time + "##" + remote_addr);
+            pipelineq.sadd("request", milli_time + "##" + request);
+            pipelineq.sadd("status", milli_time + "##" + status);
+            pipelineq.sadd("body_bytes_sent", milli_time + "##" + body_bytes_sent);
+            pipelineq.sadd("http_user_agent", milli_time + "##" + http_user_agent);
+
+            logger.info("#########################");
         }
         else {
             System.out.println("NO MATCH");
