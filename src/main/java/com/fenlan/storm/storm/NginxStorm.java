@@ -11,8 +11,8 @@ public class NginxStorm {
         config.setDebug(true);
 
         TopologyBuilder builder = new TopologyBuilder();
-        builder.setSpout("LogSpout", new LogSpout(), 2);
-        builder.setBolt("SpliteBolt", new SpliteBolt(), 4);
+        builder.setSpout("LogSpout", new LogSpout(), 1);
+        builder.setBolt("SpliteBolt", new SpliteBolt(), 1).shuffleGrouping("LogSpout");
 
         LocalCluster cluster = new LocalCluster();
         cluster.submitTopology("NginxLog", config, builder.createTopology());
