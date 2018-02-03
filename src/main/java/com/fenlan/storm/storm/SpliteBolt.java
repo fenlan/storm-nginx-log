@@ -6,6 +6,7 @@ import org.apache.storm.topology.OutputFieldsDeclarer;
 import org.apache.storm.topology.base.BaseRichBolt;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Tuple;
+import org.apache.storm.tuple.Values;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
 
@@ -53,11 +54,17 @@ public class SpliteBolt extends BaseRichBolt {
             LocalDateTime dateTime = LocalDateTime.parse(time_local, formatter);
             Long milli_time = dateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
 
-            pipelineq.sadd("remote_addr", milli_time + "##" + remote_addr);
-            pipelineq.sadd("request", milli_time + "##" + request);
-            pipelineq.sadd("status", milli_time + "##" + status);
-            pipelineq.sadd("body_bytes_sent", milli_time + "##" + body_bytes_sent);
-            pipelineq.sadd("http_user_agent", milli_time + "##" + http_user_agent);
+//            pipelineq.sadd("remote_addr", milli_time + "##" + remote_addr);
+//            pipelineq.sadd("request", milli_time + "##" + request);
+//            pipelineq.sadd("status", milli_time + "##" + status);
+//            pipelineq.sadd("body_bytes_sent", milli_time + "##" + body_bytes_sent);
+//            pipelineq.sadd("http_user_agent", milli_time + "##" + http_user_agent);
+
+            collector.emit(new Values("remote_addr", milli_time + "##" + remote_addr));
+            collector.emit(new Values("request", milli_time + "##" + request));
+            collector.emit(new Values("status", milli_time + "##" + status));
+            collector.emit(new Values("body_bytes_sent", milli_time + "##" + body_bytes_sent));
+            collector.emit(new Values("http_user_agent", milli_time + "##" + http_user_agent));
 
             logger.info("#########################");
         }
@@ -68,6 +75,6 @@ public class SpliteBolt extends BaseRichBolt {
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
-        outputFieldsDeclarer.declare(new Fields("Splite"));
+        outputFieldsDeclarer.declare(new Fields("item", "value"));
     }
 }
