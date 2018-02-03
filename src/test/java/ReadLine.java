@@ -20,13 +20,12 @@ public class ReadLine {
         Matcher matcher = pattern.matcher(record);
 
         if (matcher.find()) {
-            System.out.println(matcher.group(4).substring(1, matcher.group(4).length()-1));
-            String time = matcher.group(4).substring(1, matcher.group(4).length()-1);
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MMM/yyyy:HH:mm:ss Z", Locale.ENGLISH);
-            LocalDateTime dateTime = LocalDateTime.parse(time, formatter);
-            System.out.println(dateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
-        }
-        else {
+            String http_user_agent = matcher.group(9);
+            System.out.println(http_user_agent);
+
+            String system = http_user_agent.split(" ")[2];
+            System.out.println(system);
+        } else {
             System.out.println("NO MATCH");
         }
     }
