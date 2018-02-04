@@ -19,9 +19,9 @@ public class NginxStorm {
 
         LocalCluster cluster = new LocalCluster();
         cluster.submitTopology("NginxLog", config, builder.createTopology());
-        Thread.sleep(10000);
-
-        cluster.killTopology("NginxLog");
-        cluster.shutdown();
+//        Thread.sleep(10000);
+//
+//        cluster.killTopology("NginxLog");
+//        cluster.shutdown();
     }
 }
