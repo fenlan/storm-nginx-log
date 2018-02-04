@@ -24,7 +24,6 @@ public class SpliteBolt extends BaseRichBolt {
     private OutputCollector collector;
     private static String redisHost = "localhost";
     private static int redisPort = 6379;
-    private static Logger logger = Logger.getLogger("SpliteBolt");
     private static Jedis jedis = new Jedis(redisHost, redisPort);
 
     @Override
@@ -48,6 +47,7 @@ public class SpliteBolt extends BaseRichBolt {
             String request = matcher.group(5);
             String status = matcher.group(6);
             String body_bytes_sent = matcher.group(7);
+            String virtual_host = matcher.group(8).substring(1, matcher.group(8).length()-1);
             String http_user_agent = matcher.group(9);
 
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MMM/yyyy:HH:mm:ss Z", Locale.ENGLISH);
@@ -58,15 +58,15 @@ public class SpliteBolt extends BaseRichBolt {
 //            pipelineq.sadd("request", milli_time + "##" + request);
 //            pipelineq.sadd("status", milli_time + "##" + status);
 //            pipelineq.sadd("body_bytes_sent", milli_time + "##" + body_bytes_sent);
+//            pipelineq.sadd("virtual_host", milli_time + "##" + virtual_host);
 //            pipelineq.sadd("http_user_agent", milli_time + "##" + http_user_agent);
 
             collector.emit(new Values("remote_addr", milli_time + "##" + remote_addr));
             collector.emit(new Values("request", milli_time + "##" + request));
             collector.emit(new Values("status", milli_time + "##" + status));
             collector.emit(new Values("body_bytes_sent", milli_time + "##" + body_bytes_sent));
+            collector.emit(new Values("virtual_host", milli_time + "##" + virtual_host));
             collector.emit(new Values("http_user_agent", milli_time + "##" + http_user_agent));
-
-            logger.info("#########################");
         }
         else {
             System.out.println("NO MATCH");
