@@ -1,11 +1,11 @@
+import com.fenlan.storm.GeoIP2.AnalyzeIP;
+import com.fenlan.storm.regx.UserAgent;
+import com.maxmind.geoip2.exception.GeoIp2Exception;
+
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.ParseException;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -27,6 +27,25 @@ public class ReadLine {
             System.out.println(system);
         } else {
             System.out.println("NO MATCH");
+        }
+
+        String debian = "Debian";
+        String record1 = "Debian APT-HTTP/1.3 (1.2.24) Chrome";
+        String regx1 = ".*" + debian + ".*";
+        Pattern pattern1 = Pattern.compile(regx1);
+        Matcher matcher1 = pattern1.matcher(record1);
+        if (matcher1.find()) {
+            System.out.println("ok");
+        } else {
+            System.out.println(regx1 + " failed");
+        }
+
+        System.out.println(UserAgent.browserRegx(record1));
+
+        try {
+            System.out.println(AnalyzeIP.cityOfIP("23.83.230.171"));
+        } catch (GeoIp2Exception e) {
+            System.out.println("ip 没有找到");
         }
     }
 }
