@@ -46,67 +46,71 @@ public class CounterBolt extends BaseRichBolt {
         String city;
 
         // 统计客户端地址所在城市
-        if (item.equals("remote_addr")) {
-            try {
-                city = AnalyzeIP.cityOfIP(value);
-                if (city == null)   city = "Unknown";
-            } catch (IOException e) {
-                city = "Unknown";
-            } catch (GeoIp2Exception e) {
-                city = "Unknown";
-            }
-            if (!cityOfIP_counter.containsKey(city)) {
-                cityOfIP_counter.put(city, 1);
-            } else {
-                Integer c = cityOfIP_counter.get(city) + 1;
-                cityOfIP_counter.put(city, c);
-            }
-            jedis.hset("city_of_ip", city, cityOfIP_counter.get(city).toString());
-        }
+        switch (item) {
+            case "remote_addr" :
+                try {
+                    city = AnalyzeIP.cityOfIP(value);
+                    if (city == null)   city = "Unknown";
+                } catch (IOException e) {
+                    city = "Unknown";
+                } catch (GeoIp2Exception e) {
+                    city = "Unknown";
+                }
+                if (!cityOfIP_counter.containsKey(city)) {
+                    cityOfIP_counter.put(city, 1);
+                } else {
+                    Integer c = cityOfIP_counter.get(city) + 1;
+                    cityOfIP_counter.put(city, c);
+                }
+                jedis.hset("city_of_ip", city, cityOfIP_counter.get(city).toString());
+                break;
 
-        // http 状态码统计
-        else if (item.equals("status")) {
-            if (!status_counter.containsKey(value)) {
-                status_counter.put(value, 1);
-            } else {
-                Integer c = status_counter.get(value) + 1;
-                status_counter.put(value, c);
-            }
-            jedis.hset("status_code", value, status_counter.get(value).toString());
-        }
+            // http 状态码统计
+            case "status" :
+                if (!status_counter.containsKey(value)) {
+                    status_counter.put(value, 1);
+                } else {
+                    Integer c = status_counter.get(value) + 1;
+                    status_counter.put(value, c);
+                }
+                jedis.hset("status_code", value, status_counter.get(value).toString());
+                break;
 
-        // 客户端信息
-        else if (item.equals("http_user_agent")) {
-            String system = UserAgent.systemRegx(value);
-            String browser = UserAgent.browserRegx(value);
+            // 客户端信息
+            case "http_user_agent" :
+                String system = UserAgent.systemRegx(value);
+                String browser = UserAgent.browserRegx(value);
 
-            // 客户端系统类型统计
-            if (!system_counter.containsKey(system)) {
-                system_counter.put(system, 1);
-            } else {
-                Integer c = system_counter.get(system) + 1;
-                system_counter.put(system, c);
-            }
-            // 客户端浏览器类型统计
-            if (!browser_counter.containsKey(browser)) {
-                browser_counter.put(browser, 1);
-            } else {
-                Integer c = browser_counter.get(browser) + 1;
-                browser_counter.put(browser, c);
-            }
-            jedis.hset("http_user_agent_system", system, system_counter.get(system).toString());
-            jedis.hset("http_user_agent_browser", browser, browser_counter.get(browser).toString());
-        }
+                // 客户端系统类型统计
+                if (!system_counter.containsKey(system)) {
+                    system_counter.put(system, 1);
+                } else {
+                    Integer c = system_counter.get(system) + 1;
+                    system_counter.put(system, c);
+                }
+                // 客户端浏览器类型统计
+                if (!browser_counter.containsKey(browser)) {
+                    browser_counter.put(browser, 1);
+                } else {
+                    Integer c = browser_counter.get(browser) + 1;
+                    browser_counter.put(browser, c);
+                }
+                jedis.hset("http_user_agent_system", system, system_counter.get(system).toString());
+                jedis.hset("http_user_agent_browser", browser, browser_counter.get(browser).toString());
+                break;
 
-        // virtual_host 统计
-        else if (item.equals("virtual_host")) {
-            if (!virtualHost_counter.containsKey(value)) {
-                virtualHost_counter.put(value, 1);
-            } else {
-                Integer c = virtualHost_counter.get(value) + 1;
-                virtualHost_counter.put(value, c);
-            }
-            jedis.hset("virtual_host", value, virtualHost_counter.get(value).toString());
+            // virtual_host 统计
+            case "virtual_host" :
+                if (!virtualHost_counter.containsKey(value)) {
+                    virtualHost_counter.put(value, 1);
+                } else {
+                    Integer c = virtualHost_counter.get(value) + 1;
+                    virtualHost_counter.put(value, c);
+                }
+                jedis.hset("virtual_host", value, virtualHost_counter.get(value).toString());
+                break;
+
+            default:
         }
         collector.ack(tuple);
     }
