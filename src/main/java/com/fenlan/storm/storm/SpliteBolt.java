@@ -1,5 +1,6 @@
 package com.fenlan.storm.storm;
 
+import com.fenlan.storm.Properties.RedisProperties;
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.OutputFieldsDeclarer;
@@ -15,15 +16,14 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 import java.util.Map;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class SpliteBolt extends BaseRichBolt {
 
     private OutputCollector collector;
-    private static String redisHost = "localhost";
-    private static int redisPort = 6379;
+    private static String redisHost = RedisProperties.getRedisHost();
+    private static int redisPort = RedisProperties.getredisPort();
     private static Jedis jedis = new Jedis(redisHost, redisPort);
 
     @Override
