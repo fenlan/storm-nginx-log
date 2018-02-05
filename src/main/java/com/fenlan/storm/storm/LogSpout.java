@@ -1,5 +1,6 @@
 package com.fenlan.storm.storm;
 
+import com.fenlan.storm.Properties.FileProperties;
 import org.apache.storm.spout.SpoutOutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.OutputFieldsDeclarer;
@@ -17,7 +18,7 @@ public class LogSpout extends BaseRichSpout {
 
     private SpoutOutputCollector collector;
     private TopologyContext context;
-    private static String srcFile = "/var/log/nginx/access.log";
+    private static String srcFile = FileProperties.getLogPath();
     private static long index = 0;
 
     @Override
