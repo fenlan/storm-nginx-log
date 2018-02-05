@@ -37,3 +37,31 @@ Storm处理包括行记录划分以及Redis数据库数据统计，将统计结�
 |   host   |   客户端系统信息  |
 
 2. `storm`统计信息
+> 未完待续
+
+## 安装使用
+
+### 基础环境
+- JDK-1.8
+- Redis 4+
+- IntelliJ IDEA-2017.2
+- Nginx
+
+### 下载GeoLite2IP数据库
+日志分析客户端ip地址是使用GeoLite数据库查询ip所在城市，统计城市访问量。
+- [下载GeoLite2 开源数据库](https://dev.maxmind.com/zh-hans/geoip/geoip2/geolite2-%E5%BC%80%E6%BA%90%E6%95%B0%E6%8D%AE%E5%BA%93/)
+- 解压数据库包
+- 在项目的配置文件`src/main/resources/application.properties`中配置`geolite2City.path`为数据库的解压路径
+
+### 安装Redis数据库
+项目中使用Redis数据库存取监控信息。
+- 下载[Redis数据库](https://redis.io/)
+- 编译安装 `make && make test && make install`
+- 启动 Redis 服务端 : `nohup ./redis-server &`
+- 启动 Redis 客户端 : `./redis-cli`
+- 测试 Redis : `127.0.0.1:6379> ping`
+- 在项目的配置文件`src/main/resources/application.properties`中配置`redis.host`和`redis.port`
+
+### 配置access.log地址
+项目目前进度只读取`access.log`一个文件，在后面的进度中会读取所有的`access`日志文件
+- 在项目的配置文件`src/main/resources/application.properties`中配置`logFile.path`的路径
