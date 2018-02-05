@@ -1,6 +1,7 @@
 package com.fenlan.storm.storm;
 
 import com.fenlan.storm.GeoIP2.AnalyzeIP;
+import com.fenlan.storm.Properties.RedisProperties;
 import com.fenlan.storm.regx.UserAgent;
 import com.maxmind.geoip2.exception.GeoIp2Exception;
 import org.apache.storm.task.OutputCollector;
@@ -22,8 +23,8 @@ public class CounterBolt extends BaseRichBolt {
     private Map<String, Integer> status_counter, system_counter, browser_counter;
     private Map<String, Integer> virtualHost_counter, cityOfIP_counter;
     private OutputCollector collector;
-    private static String redisHost = "localhost";
-    private static int redisPort = 6379;
+    private static String redisHost = RedisProperties.getRedisHost();
+    private static int redisPort = RedisProperties.getredisPort();
     private static Jedis jedis = new Jedis(redisHost, redisPort);
     private static Logger logger = Logger.getLogger("CounterBolt");
 
@@ -48,6 +49,7 @@ public class CounterBolt extends BaseRichBolt {
         if (item.equals("remote_addr")) {
             try {
                 city = AnalyzeIP.cityOfIP(value);
+                if (city == null)   city = "Unknown";
             } catch (IOException e) {
                 city = "Unknown";
             } catch (GeoIp2Exception e) {
@@ -105,7 +107,6 @@ public class CounterBolt extends BaseRichBolt {
                 virtualHost_counter.put(value, c);
             }
             jedis.hset("virtual_host", value, virtualHost_counter.get(value).toString());
-            logger.info(value + " : " + jedis.hget("virtual_host", value));
         }
         collector.ack(tuple);
     }
