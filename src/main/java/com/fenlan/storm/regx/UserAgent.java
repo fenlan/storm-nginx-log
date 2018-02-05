@@ -85,30 +85,33 @@ public class UserAgent {
     }
 
     public static String systemRegx(String record) {
-        String result = null;
+        String result;
         Iterator iterator = OS.entrySet().iterator();
 
-        while (iterator.hasNext()) {
-            Map.Entry entry = (Map.Entry) iterator.next();
-            if (Pattern.compile(".*" + entry.getKey() + ".*").matcher(record).find()) {
-                result = entry.getValue().toString();
-                break;
-            }
-        }
+        result = iterator(iterator, record);
         return result;
     }
 
     public static String browserRegx(String record) {
-        String result = null;
+        String result;
         Iterator iterator = browser.entrySet().iterator();
 
+        result = iterator(iterator, record);
+        return result;
+    }
+
+    private static String iterator(Iterator iterator, String record) {
+        String result = null;
         while (iterator.hasNext()) {
             Map.Entry entry = (Map.Entry) iterator.next();
-            if (Pattern.compile(".*" + entry.getKey() + ".*").matcher(record).find()) {
+            boolean match_boolen = Pattern.compile(".*" + entry.getKey() + ".*").matcher(record).find();
+
+            if (match_boolen) {
                 result = entry.getValue().toString();
                 break;
             }
         }
+
         return result;
     }
 }
