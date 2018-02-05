@@ -45,8 +45,8 @@ public class CounterBolt extends BaseRichBolt {
         String value = tuple.getString(1).split("##")[1];
         String city;
 
-        // 统计客户端地址所在城市
         switch (item) {
+            // 统计客户端地址所在城市
             case "remote_addr" :
                 try {
                     city = AnalyzeIP.cityOfIP(value);
@@ -56,23 +56,13 @@ public class CounterBolt extends BaseRichBolt {
                 } catch (GeoIp2Exception e) {
                     city = "Unknown";
                 }
-                if (!cityOfIP_counter.containsKey(city)) {
-                    cityOfIP_counter.put(city, 1);
-                } else {
-                    Integer c = cityOfIP_counter.get(city) + 1;
-                    cityOfIP_counter.put(city, c);
-                }
+                counter(cityOfIP_counter, city);
                 jedis.hset("city_of_ip", city, cityOfIP_counter.get(city).toString());
                 break;
 
             // http 状态码统计
             case "status" :
-                if (!status_counter.containsKey(value)) {
-                    status_counter.put(value, 1);
-                } else {
-                    Integer c = status_counter.get(value) + 1;
-                    status_counter.put(value, c);
-                }
+                counter(status_counter, value);
                 jedis.hset("status_code", value, status_counter.get(value).toString());
                 break;
 
@@ -82,31 +72,17 @@ public class CounterBolt extends BaseRichBolt {
                 String browser = UserAgent.browserRegx(value);
 
                 // 客户端系统类型统计
-                if (!system_counter.containsKey(system)) {
-                    system_counter.put(system, 1);
-                } else {
-                    Integer c = system_counter.get(system) + 1;
-                    system_counter.put(system, c);
-                }
+                counter(system_counter, system);
+
                 // 客户端浏览器类型统计
-                if (!browser_counter.containsKey(browser)) {
-                    browser_counter.put(browser, 1);
-                } else {
-                    Integer c = browser_counter.get(browser) + 1;
-                    browser_counter.put(browser, c);
-                }
+                counter(browser_counter, browser);
                 jedis.hset("http_user_agent_system", system, system_counter.get(system).toString());
                 jedis.hset("http_user_agent_browser", browser, browser_counter.get(browser).toString());
                 break;
 
             // virtual_host 统计
             case "virtual_host" :
-                if (!virtualHost_counter.containsKey(value)) {
-                    virtualHost_counter.put(value, 1);
-                } else {
-                    Integer c = virtualHost_counter.get(value) + 1;
-                    virtualHost_counter.put(value, c);
-                }
+                counter(virtualHost_counter, value);
                 jedis.hset("virtual_host", value, virtualHost_counter.get(value).toString());
                 break;
 
@@ -118,5 +94,14 @@ public class CounterBolt extends BaseRichBolt {
     @Override
     public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
         outputFieldsDeclarer.declare(new Fields("item"));
+    }
+
+    private static void counter(Map<String, Integer> map, String value) {
+        if (!map.containsKey(value)) {
+            map.put(value, 1);
+        } else {
+            Integer c = map.get(value) + 1;
+            map.put(value, c);
+        }
     }
 }
