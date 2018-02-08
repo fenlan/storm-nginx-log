@@ -6,7 +6,7 @@
 [![codebeat badge](https://codebeat.co/badges/cbf116f9-877c-420c-b8c1-1414beb9917a)](https://codebeat.co/projects/github-com-fenlan-storm-nginx-log-master)
 ![size](https://github-size-badge.herokuapp.com/fenlan/storm-nginx-log.svg)
 ![platform](https://img.shields.io/badge/platform-Linux-orange.svg)
-![progress](http://progressed.io/bar/19?title=completed)
+![progress](http://progressed.io/bar/25?title=completed)
 
 </div>
 
