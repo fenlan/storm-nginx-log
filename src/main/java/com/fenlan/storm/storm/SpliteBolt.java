@@ -84,6 +84,7 @@ public class SpliteBolt extends BaseRichBolt {
         outputFieldsDeclarer.declare(new Fields("item", "value"));
     }
 
+    // 每天浏览量统计
     private void addToDay(LocalDateTime localDateTime) {
         day = localDateTime.getYear() * 10000 +
                 localDateTime.getMonthValue() * 100 + localDateTime.getDayOfMonth();
