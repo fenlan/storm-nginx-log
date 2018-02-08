@@ -32,13 +32,13 @@ public class ReadLine {
             System.out.println("NO MATCH");
         }
 
-        String debian = "Debian";
-        String record1 = "Debian APT-HTTP/1.3 (1.2.24) Chrome";
-        String regx1 = ".*" + debian + ".*";
+        String record1 = "http://blog.fenlan96.com/2017/11/30/%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97/";
+        String regx1 = "([^/]*)(\\/\\/[^/]*\\/)([^ ]*)";
         Pattern pattern1 = Pattern.compile(regx1);
         Matcher matcher1 = pattern1.matcher(record1);
         if (matcher1.find()) {
             System.out.println("ok");
+            System.out.println(matcher1.group(2));
         } else {
             System.out.println(regx1 + " failed");
         }
