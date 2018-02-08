@@ -17,6 +17,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class CounterBolt extends BaseRichBolt {
 
@@ -62,8 +64,11 @@ public class CounterBolt extends BaseRichBolt {
 
             // http 状态码统计
             case "status" :
-                counter(status_counter, value);
-                jedis.hset("status_code", value, status_counter.get(value).toString());
+                // 将状态码分为 1** 2** 3** 4** 5**
+                Integer status = Integer.parseInt(value) / 100;
+                String statusStr = status + "**";
+                counter(status_counter, statusStr);
+                jedis.hset("status_code", statusStr, status_counter.get(statusStr).toString());
                 break;
 
             // 客户端信息
@@ -82,8 +87,15 @@ public class CounterBolt extends BaseRichBolt {
 
             // virtual_host 统计
             case "virtual_host" :
-                counter(virtualHost_counter, value);
-                jedis.hset("virtual_host", value, virtualHost_counter.get(value).toString());
+                String regx = "([^/]*)(\\/\\/[^/]*\\/)([^ ]*)";
+                Pattern pattern = Pattern.compile(regx);
+                Matcher matcher = pattern.matcher(value);
+                if (matcher.find()) {
+                    String matcherString = matcher.group(2);
+                    String virtual_host = matcherString.substring(2, matcherString.length()-1);
+                    counter(virtualHost_counter, virtual_host);
+                    jedis.hset("virtual_host", virtual_host, virtualHost_counter.get(virtual_host).toString());
+                }
                 break;
 
             default:
