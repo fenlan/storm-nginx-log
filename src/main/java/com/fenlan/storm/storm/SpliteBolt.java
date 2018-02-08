@@ -14,6 +14,7 @@ import redis.clients.jedis.Pipeline;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -25,17 +26,19 @@ public class SpliteBolt extends BaseRichBolt {
     private static String redisHost = RedisProperties.getRedisHost();
     private static int redisPort = RedisProperties.getredisPort();
     private static Jedis jedis = new Jedis(redisHost, redisPort);
+    private Map<String, Integer> day_counter;
+    private static Integer day;
 
     @Override
     public void prepare(Map map, TopologyContext topologyContext, OutputCollector outputCollector) {
         this.collector = outputCollector;
+        this.day_counter = new HashMap<>();
     }
 
     @Override
     public void execute(Tuple tuple) {
         long index = tuple.getLong(0);
         String record = tuple.getString(1);
-        Pipeline pipelineq = jedis.pipelined();
 
         String regx = "([^ ]*) ([^ ]*) ([^ ]*) (\\[.*\\]) (\\\".*?\\\") (-|[0-9]*) (-|[0-9]*) (\\\".*?\\\") (\\\".*?\\\")";
         Pattern pattern = Pattern.compile(regx);
@@ -53,6 +56,9 @@ public class SpliteBolt extends BaseRichBolt {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MMM/yyyy:HH:mm:ss Z", Locale.ENGLISH);
             LocalDateTime dateTime = LocalDateTime.parse(time_local, formatter);
             Long milli_time = dateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+
+            addToDay(dateTime);
+            jedis.hset("days_counter", day.toString(), day_counter.get(day.toString()).toString());
 
 //            pipelineq.sadd("remote_addr", milli_time + "##" + remote_addr);
 //            pipelineq.sadd("request", milli_time + "##" + request);
@@ -76,5 +82,11 @@ public class SpliteBolt extends BaseRichBolt {
     @Override
     public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
         outputFieldsDeclarer.declare(new Fields("item", "value"));
+    }
+
+    private void addToDay(LocalDateTime localDateTime) {
+        day = localDateTime.getYear() * 10000 +
+                localDateTime.getMonthValue() * 100 + localDateTime.getDayOfMonth();
+        CounterBolt.counter(day_counter, day.toString());
     }
 }
