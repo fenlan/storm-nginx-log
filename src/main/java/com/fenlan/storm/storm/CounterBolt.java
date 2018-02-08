@@ -30,11 +30,11 @@ public class CounterBolt extends BaseRichBolt {
 
     @Override
     public void prepare(Map map, TopologyContext topologyContext, OutputCollector outputCollector) {
-        this.status_counter = new HashMap<String, Integer>();
-        this.system_counter = new HashMap<String, Integer>();
-        this.browser_counter = new HashMap<String, Integer>();
-        this.virtualHost_counter = new HashMap<String, Integer>();
-        this.cityOfIP_counter = new HashMap<String, Integer>();
+        this.status_counter = new HashMap<>();
+        this.system_counter = new HashMap<>();
+        this.browser_counter = new HashMap<>();
+        this.virtualHost_counter = new HashMap<>();
+        this.cityOfIP_counter = new HashMap<>();
         this.collector = outputCollector;
     }
 
@@ -96,7 +96,7 @@ public class CounterBolt extends BaseRichBolt {
         outputFieldsDeclarer.declare(new Fields("item"));
     }
 
-    private static void counter(Map<String, Integer> map, String value) {
+    public static void counter(Map<String, Integer> map, String value) {
         if (!map.containsKey(value)) {
             map.put(value, 1);
         } else {
