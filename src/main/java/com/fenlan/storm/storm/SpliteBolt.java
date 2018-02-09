@@ -14,9 +14,7 @@ import redis.clients.jedis.Pipeline;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -27,12 +25,16 @@ public class SpliteBolt extends BaseRichBolt {
     private static int redisPort = RedisProperties.getredisPort();
     private static Jedis jedis = new Jedis(redisHost, redisPort);
     private Map<String, Integer> day_counter;
-    private static Integer day;
+    // day 是计算当前年月日时间
+    // today 是为计算 visitor 为 day 的上一次值
+    private static Integer day, today = 0;
+    private static Set<String> visitors;
 
     @Override
     public void prepare(Map map, TopologyContext topologyContext, OutputCollector outputCollector) {
         this.collector = outputCollector;
         this.day_counter = new HashMap<>();
+        this.visitors = new HashSet<>();
     }
 
     @Override
@@ -58,7 +60,16 @@ public class SpliteBolt extends BaseRichBolt {
             Long milli_time = dateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
 
             addToDay(dateTime);
+            // 每天访问者统计
+            if (day.equals(today)) {
+                visitors.add(remote_addr);
+            } else {
+                visitors.clear();
+                visitors.add(remote_addr);
+                today = day;
+            }
             jedis.hset("days_counter", day.toString(), day_counter.get(day.toString()).toString());
+            jedis.hset("days_visitor_counter", day.toString(), Integer.toString(visitors.size()));
 
 //            pipelineq.sadd("remote_addr", milli_time + "##" + remote_addr);
 //            pipelineq.sadd("request", milli_time + "##" + request);
