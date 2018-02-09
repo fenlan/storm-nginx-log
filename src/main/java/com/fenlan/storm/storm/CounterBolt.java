@@ -11,12 +11,9 @@ import org.apache.storm.topology.base.BaseRichBolt;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Tuple;
 import redis.clients.jedis.Jedis;
-import redis.clients.jedis.Pipeline;
-
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -28,7 +25,6 @@ public class CounterBolt extends BaseRichBolt {
     private static String redisHost = RedisProperties.getRedisHost();
     private static int redisPort = RedisProperties.getredisPort();
     private static Jedis jedis = new Jedis(redisHost, redisPort);
-    private static Logger logger = Logger.getLogger("CounterBolt");
 
     @Override
     public void prepare(Map map, TopologyContext topologyContext, OutputCollector outputCollector) {
@@ -43,7 +39,6 @@ public class CounterBolt extends BaseRichBolt {
     @Override
     public void execute(Tuple tuple) {
         String item = tuple.getString(0);
-        Pipeline pipelineq = jedis.pipelined();
         String value = tuple.getString(1).split("##")[1];
         String city;
 
