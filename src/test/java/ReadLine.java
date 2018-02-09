@@ -1,4 +1,5 @@
 import com.fenlan.storm.GeoIP2.AnalyzeIP;
+import com.fenlan.storm.data.DataAnalyze;
 import com.fenlan.storm.regx.UserAgent;
 import com.maxmind.geoip2.exception.GeoIp2Exception;
 
@@ -58,5 +59,7 @@ public class ReadLine {
         System.out.println(20180208 / 10000);
         System.out.println(20180208 % 100);
         System.out.println((20180208 - 20180208 / 10000 * 10000) / 100);
+
+        System.out.println(DataAnalyze.getNetFileSizeDescription(15));
     }
 }
