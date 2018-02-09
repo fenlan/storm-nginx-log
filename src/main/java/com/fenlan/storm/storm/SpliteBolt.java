@@ -1,6 +1,7 @@
 package com.fenlan.storm.storm;
 
 import com.fenlan.storm.Properties.RedisProperties;
+import com.fenlan.storm.data.DataAnalyze;
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.OutputFieldsDeclarer;
@@ -28,6 +29,7 @@ public class SpliteBolt extends BaseRichBolt {
     // today 是为计算 visitor 为 day 的上一次值
     private static Integer day, today = 0;
     private static Set<String> visitors;
+    private static long total_bytes = 0;
 
     @Override
     public void prepare(Map map, TopologyContext topologyContext, OutputCollector outputCollector) {
@@ -60,16 +62,17 @@ public class SpliteBolt extends BaseRichBolt {
 
             addToDay(dateTime);
             // 每天访问者统计
-            if (day.equals(today)) {
-                visitors.add(remote_addr);
-            } else {
-                visitors.clear();
-                visitors.add(remote_addr);
+            if (!day.equals(today)) {
+                visitors .clear();
+                total_bytes = 0;
                 today = day;
             }
+            visitors.add(remote_addr);
+            total_bytes += Long.parseLong(body_bytes_sent);
+
             jedis.hset("days_counter", day.toString(), day_counter.get(day.toString()).toString());
             jedis.hset("days_visitor_counter", day.toString(), Integer.toString(visitors.size()));
-
+            jedis.hset("days_bytes_counter", day.toString(), DataAnalyze.getNetFileSizeDescription(total_bytes));
 
             collector.emit(new Values("remote_addr", milli_time + "##" + remote_addr));
             collector.emit(new Values("request", milli_time + "##" + request));
