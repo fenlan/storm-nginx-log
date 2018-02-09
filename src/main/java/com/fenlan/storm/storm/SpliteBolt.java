@@ -9,7 +9,6 @@ import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Tuple;
 import org.apache.storm.tuple.Values;
 import redis.clients.jedis.Jedis;
-import redis.clients.jedis.Pipeline;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -71,12 +70,6 @@ public class SpliteBolt extends BaseRichBolt {
             jedis.hset("days_counter", day.toString(), day_counter.get(day.toString()).toString());
             jedis.hset("days_visitor_counter", day.toString(), Integer.toString(visitors.size()));
 
-//            pipelineq.sadd("remote_addr", milli_time + "##" + remote_addr);
-//            pipelineq.sadd("request", milli_time + "##" + request);
-//            pipelineq.sadd("status", milli_time + "##" + status);
-//            pipelineq.sadd("body_bytes_sent", milli_time + "##" + body_bytes_sent);
-//            pipelineq.sadd("virtual_host", milli_time + "##" + virtual_host);
-//            pipelineq.sadd("http_user_agent", milli_time + "##" + http_user_agent);
 
             collector.emit(new Values("remote_addr", milli_time + "##" + remote_addr));
             collector.emit(new Values("request", milli_time + "##" + request));
