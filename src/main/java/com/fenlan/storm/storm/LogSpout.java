@@ -7,12 +7,12 @@ import org.apache.storm.topology.OutputFieldsDeclarer;
 import org.apache.storm.topology.base.BaseRichSpout;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Values;
-
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 public class LogSpout extends BaseRichSpout {
 
@@ -33,7 +33,9 @@ public class LogSpout extends BaseRichSpout {
         String record = null;
 
         try {
-            lines = Files.lines(Paths.get(srcFile)).count();
+            Stream<String> fileStream = Files.lines(Paths.get(srcFile));
+            lines = fileStream.count();
+            fileStream.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -41,7 +43,8 @@ public class LogSpout extends BaseRichSpout {
             if (lines < index)      index = 0;
             for (long i = index; i < lines; i++) {
                 try {
-                    record = Files.readAllLines(Paths.get(srcFile)).get((int)i);
+                    List<String> fileStream = Files.readAllLines(Paths.get(srcFile));
+                    record = fileStream.get((int)i);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
