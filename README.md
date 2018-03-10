@@ -142,3 +142,8 @@ if (matcher.find()) {
 ### 配置access.log地址
 项目目前进度只读取`access.log`一个文件，在后面的进度中会读取所有的`access`日志文件
 - 在项目的配置文件`src/main/resources/application.properties`中配置`logFile.path`的路径
+
+## 更新说明
+- 想法很多，时间允许的情况下，会添加更多的统计方式，诸如每天的统计信息、每月的统计信息、所有记录统计信息。
+- 有待增加Web前端展示，最近很忙，暂停更新。
+- 向Goaccess看齐，也极力推荐Goaccess。[https://goaccess.io/](https://goaccess.io/)，项目精小，功能相对全面，不知道是不是自己没仔细阅读它的文档，没有发现它借用数据库，因此数据很容易丢失。但这样的好处就是使项目不占用过多系统资源。
