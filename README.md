@@ -6,12 +6,14 @@
 [![codebeat badge](https://codebeat.co/badges/cbf116f9-877c-420c-b8c1-1414beb9917a)](https://codebeat.co/projects/github-com-fenlan-storm-nginx-log-master)
 ![size](https://github-size-badge.herokuapp.com/fenlan/storm-nginx-log.svg)
 ![platform](https://img.shields.io/badge/platform-Linux-orange.svg)
-![progress](http://progressed.io/bar/25?title=completed)
+![progress](http://progressed.io/bar/90?title=completed)
 
 </div>
 
 ## 简单介绍
-项目基于`storm`的实时nginx日志监控，通过读取nginx的日志文件`access.log`来收集nginx服务器的状态，并在一定时间内，统计访问ip的国家地址、指定时间内所有访问次数、访问的状态码、访问的站点、访问者使用的系统、访问者使用的浏览器。
+`单机版(master branch)` : 项目基于`storm`的实时nginx日志监控，通过读取nginx的日志文件access.log来收集nginx服务器的状态，并在一定时间内，统计访问ip的国家地址、指定时间内所有访问次数、访问的状态码、访问的站点、访问者使用的系统、访问者使用的浏览器。
+
+`集群版(cluster branch)` : 项目基于`Kafka` `storm`的实时nginx日志监控，将nginx的日志文件access.log读取并放入`Kafka`队列中，`Storm`的`Spout`来对接`Kafka`消息队列，来收集nginx服务器的状态，并在一定时间内，统计访问ip的国家地址、指定时间内所有访问次数、访问的状态码、访问的站点、访问者使用的系统、访问者使用的浏览器。
 
 ## 实现思路
 1. 数据读取
@@ -22,6 +24,9 @@ storm将日志行记录划分成不同的块，其中包括ip地址块、访问�
 
 3. 数据处理
 Storm CounterBolt对提交来的块做对应的统计处理，将处理结果存入Redis。
+
+## 集群模式逻辑结构
+![](https://github.com/fenlan/Mycode/blob/master/images/nginxLog/nginxTop.png)
 
 ## Storm处理过程
 1. `storm`分块结果
@@ -147,3 +152,4 @@ if (matcher.find()) {
 - 想法很多，时间允许的情况下，会添加更多的统计方式，诸如每天的统计信息、每月的统计信息、所有记录统计信息。
 - 有待增加Web前端展示，最近很忙，暂停更新。
 - 向Goaccess看齐，也极力推荐Goaccess。[https://goaccess.io/](https://goaccess.io/)，项目精小，功能相对全面，不知道是不是自己没仔细阅读它的文档，没有发现它借用数据库，因此数据很容易丢失。但这样的好处就是使项目不占用过多系统资源。
+- 很感谢美团面试官，给我提供了一个集群模式日志获取的解决思路
