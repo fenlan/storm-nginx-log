@@ -1,7 +1,11 @@
 import com.fenlan.storm.GeoIP2.AnalyzeIP;
+import com.fenlan.storm.Properties.RedisProperties;
 import com.fenlan.storm.data.DataAnalyze;
 import com.fenlan.storm.regx.UserAgent;
 import com.maxmind.geoip2.exception.GeoIp2Exception;
+import org.apache.storm.tuple.Values;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPubSub;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -16,50 +20,12 @@ import java.util.regex.Pattern;
 public class ReadLine {
 
     private static String srcFile = "/var/log/nginx/access.log";
+    private static String redisHost = RedisProperties.getRedisHost();
+    private static int redisPort = RedisProperties.getredisPort();
+    private static Jedis jedis = new Jedis(redisHost, redisPort);
 
     public static void main(String[] argv) throws IOException, ParseException {
-        String record = Files.readAllLines(Paths.get(srcFile)).get(0);
-        String regx = "([^ ]*) ([^ ]*) ([^ ]*) (\\[.*\\]) (\\\".*?\\\") (-|[0-9]*) (-|[0-9]*) (\\\".*?\\\") (\\\".*?\\\")";
-        Pattern pattern = Pattern.compile(regx);
-        Matcher matcher = pattern.matcher(record);
 
-        if (matcher.find()) {
-            String http_user_agent = matcher.group(9);
-            System.out.println(http_user_agent);
 
-            String system = http_user_agent.split(" ")[2];
-            System.out.println(system);
-        } else {
-            System.out.println("NO MATCH");
-        }
-
-        String record1 = "http://blog.fenlan96.com/2017/11/30/%E5%88%86%E5%B8%83%E5%BC%8F%E8%AE%A1%E7%AE%97/";
-        String regx1 = "([^/]*)(\\/\\/[^/]*\\/)([^ ]*)";
-        Pattern pattern1 = Pattern.compile(regx1);
-        Matcher matcher1 = pattern1.matcher(record1);
-        if (matcher1.find()) {
-            System.out.println("ok");
-            System.out.println(matcher1.group(2));
-        } else {
-            System.out.println(regx1 + " failed");
-        }
-
-        System.out.println(UserAgent.browserRegx(record1));
-
-        try {
-            System.out.println(AnalyzeIP.cityOfIP("23.83.230.171"));
-        } catch (GeoIp2Exception e) {
-            System.out.println("ip 没有找到");
-        }
-
-        String time_local = matcher.group(4).substring(1, matcher.group(4).length()-1);
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MMM/yyyy:HH:mm:ss Z", Locale.ENGLISH);
-        LocalDateTime dateTime = LocalDateTime.parse(time_local, formatter);
-        System.out.println("date : " + dateTime + " " + dateTime.getMonthValue() + " " + dateTime.getDayOfMonth());
-        System.out.println(20180208 / 10000);
-        System.out.println(20180208 % 100);
-        System.out.println((20180208 - 20180208 / 10000 * 10000) / 100);
-
-        System.out.println(DataAnalyze.getNetFileSizeDescription(15));
     }
 }
