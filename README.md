@@ -26,7 +26,9 @@ storm将日志行记录划分成不同的块，其中包括ip地址块、访问�
 Storm CounterBolt对提交来的块做对应的统计处理，将处理结果存入Redis。
 
 ## 集群模式逻辑结构
-<image align=center src="https://github.com/fenlan/Mycode/blob/master/images/nginxLog/nginxTop.png"></image>
+<p align="center">
+<image src="https://github.com/fenlan/Mycode/blob/master/images/nginxLog/nginxTop.png"></image>
+</p>
 
 ## Storm处理过程
 1. `storm`分块结果
