@@ -40,8 +40,7 @@ public class SpliteBolt extends BaseRichBolt {
 
     @Override
     public void execute(Tuple tuple) {
-        long index = Long.parseLong(tuple.getString(0));
-        String record = tuple.getString(1);
+        String record = tuple.getString(0);
 
         String regx = "([^ ]*) ([^ ]*) ([^ ]*) (\\[.*\\]) (\\\".*?\\\") (-|[0-9]*) (-|[0-9]*) (\\\".*?\\\") (\\\".*?\\\")";
         Pattern pattern = Pattern.compile(regx);
