@@ -17,4 +17,10 @@ public class KafkaProperties {
 
         return resourceBundle.getString("kafkaTopic");
     }
+
+    public static String getZookeeperHosts() {
+        ResourceBundle resourceBundle = ResourceBundle.getBundle("application");
+
+        return resourceBundle.getString("zookeeper.hosts");
+    }
 }
