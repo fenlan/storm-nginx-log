@@ -18,6 +18,7 @@
 ## 实现思路
 1. 数据读取
 `Storm`Spout读取`access.log`文件，将新产生的行记录提交给SpliteBolt。
+集群模式中数据读取由Kafka Producer做，Storm消费消息记录，Storm采用KafkaSpout与Kafka整合。
 
 2. 数据存储
 storm将日志行记录划分成不同的块，其中包括ip地址块、访问时间块、访问请求信息块、访问状态码快、访问请求返回大小块、访问主机信息块。将每个块提交给CounterBolt。此外，在SpliteBolt中对行记录统计得到每天访问量等信息，存入Redis。
@@ -149,6 +150,10 @@ if (matcher.find()) {
 ### 配置access.log地址
 项目目前进度只读取`access.log`一个文件，在后面的进度中会读取所有的`access`日志文件
 - 在项目的配置文件`src/main/resources/application.properties`中配置`logFile.path`的路径
+
+### 配置zookeeper节点
+`Storm`中`KafkaSpout`需要配置`zookeeper`节点，依托`zookeeper`来管理`kafka`和`storm`
+- 在项目的配置文件`src/main/resources/application.properties`中配置`zookeeper.hosts`
 
 ## 更新说明
 - 想法很多，时间允许的情况下，会添加更多的统计方式，诸如每天的统计信息、每月的统计信息、所有记录统计信息。
