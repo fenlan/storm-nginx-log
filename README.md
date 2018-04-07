@@ -124,6 +124,9 @@ if (matcher.find()) {
 ### 客户端浏览器统计
 ![](https://github.com/fenlan/Mycode/blob/master/images/nginxLog/user_browser.png)
 
+### 部署测试
+[](https://github.com/fenlan/Mycode/blob/master/images/nginxLog/nginx_log_monitor.png)
+
 ## 安装使用
 
 ### 基础环境
