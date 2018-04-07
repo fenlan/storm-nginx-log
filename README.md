@@ -2,8 +2,8 @@
 
 <div align="center">
 
-![build status](https://travis-ci.org/fenlan/storm-nginx-log.svg?branch=master)
-[![codebeat badge](https://codebeat.co/badges/cbf116f9-877c-420c-b8c1-1414beb9917a)](https://codebeat.co/projects/github-com-fenlan-storm-nginx-log-master)
+![build status](https://travis-ci.org/fenlan/storm-nginx-log.svg?branch=cluster)
+[![codebeat badge](https://codebeat.co/badges/cbf116f9-877c-420c-b8c1-1414beb9917a)](https://codebeat.co/projects/github-com-fenlan-storm-nginx-log-cluster)
 ![size](https://github-size-badge.herokuapp.com/fenlan/storm-nginx-log.svg)
 ![platform](https://img.shields.io/badge/platform-Linux-orange.svg)
 ![progress](http://progressed.io/bar/90?title=completed)
