@@ -125,7 +125,7 @@ if (matcher.find()) {
 ![](https://github.com/fenlan/Mycode/blob/master/images/nginxLog/user_browser.png)
 
 ### 部署测试
-[](https://github.com/fenlan/Mycode/blob/master/images/nginxLog/nginx_log_monitor.png)
+![](https://github.com/fenlan/Mycode/blob/master/images/nginxLog/nginx_log_monitor.png)
 
 ## 安装使用
 
