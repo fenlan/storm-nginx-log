@@ -92,8 +92,15 @@ if (matcher.find()) {
     String matcherString = matcher.group(2);
     String virtual_host = matcherString.substring(2, matcherString.length()-1);
     counter(virtualHost_counter, virtual_host);
-    jedis.hset("virtual_host", virtual_host, virtualHost_counter.get(virtual_host).toString());
 }
+```
+伪码中的counter使用了Redis数据库的自增操作，每统计到一条记录，在Redis对应的Key上自增。具体实现如下
+``` java
+jedis.hincrBy("city_of_ip", city, 1);
+jedis.hincrBy("status_code", statusStr, 1);
+jedis.hincrBy("http_user_agent_system", system, 1);
+jedis.hincrBy("http_user_agent_browser", browser, 1);
+......
 ```
 
 ## 统计结果截图
@@ -163,3 +170,4 @@ if (matcher.find()) {
 - 有待增加Web前端展示，最近很忙，暂停更新。
 - 向Goaccess看齐，也极力推荐Goaccess。[https://goaccess.io/](https://goaccess.io/)，项目精小，功能相对全面，不知道是不是自己没仔细阅读它的文档，没有发现它借用数据库，因此数据很容易丢失。但这样的好处就是使项目不占用过多系统资源。
 - 很感谢美团面试官，给我提供了一个集群模式日志获取的解决思路
+- 最新更新结果 : 原来版本中所有的统计是在Java代码中进行的，在Java代码中设置一个计数器，记录下计数值，然后更新进Redis。改进的统计方式是利用Redis的自增操作，将数据保留在Redis数据库中，每次获取到记录，将记录对应Redis中Key的value自增。这样的好处是JVM中不再保留计数值，相对减少了项目的内存占用。
