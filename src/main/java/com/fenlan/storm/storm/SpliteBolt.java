@@ -24,7 +24,6 @@ public class SpliteBolt extends BaseRichBolt {
     private static String redisHost = RedisProperties.getRedisHost();
     private static int redisPort = RedisProperties.getredisPort();
     private static Jedis jedis = new Jedis(redisHost, redisPort);
-    private Map<String, Integer> day_counter;
     // day 是计算当前年月日时间
     // today 是为计算 visitor 为 day 的上一次值
     private static Integer day, today = 0;
@@ -34,13 +33,11 @@ public class SpliteBolt extends BaseRichBolt {
     @Override
     public void prepare(Map map, TopologyContext topologyContext, OutputCollector outputCollector) {
         this.collector = outputCollector;
-        this.day_counter = new HashMap<>();
         this.visitors = new HashSet<>();
     }
 
     @Override
     public void execute(Tuple tuple) {
-        long index = tuple.getLong(0);
         String record = tuple.getString(1);
 
         String regx = "([^ ]*) ([^ ]*) ([^ ]*) (\\[.*\\]) (\\\".*?\\\") (-|[0-9]*) (-|[0-9]*) (\\\".*?\\\") (\\\".*?\\\")";
@@ -60,7 +57,8 @@ public class SpliteBolt extends BaseRichBolt {
             LocalDateTime dateTime = LocalDateTime.parse(time_local, formatter);
             Long milli_time = dateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
 
-            addToDay(dateTime);
+            day = dateTime.getYear() * 10000 +
+                    dateTime.getMonthValue() * 100 + dateTime.getDayOfMonth();
             // 每天访问者统计
             if (!day.equals(today)) {
                 visitors .clear();
@@ -70,9 +68,10 @@ public class SpliteBolt extends BaseRichBolt {
             visitors.add(remote_addr);
             total_bytes += Long.parseLong(body_bytes_sent);
 
-            jedis.hset("days_counter", day.toString(), day_counter.get(day.toString()).toString());
+            jedis.hincrBy("days_counter", day.toString(), 1);
             jedis.hset("days_visitor_counter", day.toString(), Integer.toString(visitors.size()));
             jedis.hset("days_bytes_counter", day.toString(), DataAnalyze.getNetFileSizeDescription(total_bytes));
+
 
             collector.emit(new Values("remote_addr", milli_time + "##" + remote_addr));
             collector.emit(new Values("request", milli_time + "##" + request));
@@ -89,12 +88,5 @@ public class SpliteBolt extends BaseRichBolt {
     @Override
     public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
         outputFieldsDeclarer.declare(new Fields("item", "value"));
-    }
-
-    // 每天浏览量统计
-    private void addToDay(LocalDateTime localDateTime) {
-        day = localDateTime.getYear() * 10000 +
-                localDateTime.getMonthValue() * 100 + localDateTime.getDayOfMonth();
-        CounterBolt.counter(day_counter, day.toString());
     }
 }
