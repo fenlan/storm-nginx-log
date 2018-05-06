@@ -19,7 +19,6 @@ import java.util.regex.Pattern;
 
 public class CounterBolt extends BaseRichBolt {
 
-    private Map<String, Integer> counter;
     private OutputCollector collector;
     private static String redisHost = RedisProperties.getRedisHost();
     private static int redisPort = RedisProperties.getredisPort();
@@ -27,7 +26,6 @@ public class CounterBolt extends BaseRichBolt {
 
     @Override
     public void prepare(Map map, TopologyContext topologyContext, OutputCollector outputCollector) {
-        this.counter = new HashMap<>();
         this.collector = outputCollector;
     }
 
@@ -48,8 +46,7 @@ public class CounterBolt extends BaseRichBolt {
                 } catch (GeoIp2Exception e) {
                     city = "Unknown";
                 }
-                counter(counter, city);
-                jedis.hset("city_of_ip", city, counter.get(city).toString());
+                jedis.hincrBy("city_of_ip", city, 1);
                 break;
 
             // http 状态码统计
@@ -57,8 +54,7 @@ public class CounterBolt extends BaseRichBolt {
                 // 将状态码分为 1** 2** 3** 4** 5**
                 Integer status = Integer.parseInt(value) / 100;
                 String statusStr = status + "**";
-                counter(counter, statusStr);
-                jedis.hset("status_code", statusStr, counter.get(statusStr).toString());
+                jedis.hincrBy("status_code", statusStr, 1);
                 break;
 
             // 客户端信息
@@ -67,12 +63,9 @@ public class CounterBolt extends BaseRichBolt {
                 String browser = UserAgent.browserRegx(value);
 
                 // 客户端系统类型统计
-                counter(counter, system);
-
                 // 客户端浏览器类型统计
-                counter(counter, browser);
-                jedis.hset("http_user_agent_system", system, counter.get(system).toString());
-                jedis.hset("http_user_agent_browser", browser, counter.get(browser).toString());
+                jedis.hincrBy("http_user_agent_system", system, 1);
+                jedis.hincrBy("http_user_agent_browser", browser, 1);
                 break;
 
             // virtual_host 统计
@@ -83,8 +76,7 @@ public class CounterBolt extends BaseRichBolt {
                 if (matcher.find()) {
                     String matcherString = matcher.group(2);
                     String virtual_host = matcherString.substring(2, matcherString.length()-1);
-                    counter(counter, virtual_host);
-                    jedis.hset("virtual_host", virtual_host, counter.get(virtual_host).toString());
+                    jedis.hincrBy("virtual_host", virtual_host, 1);
                 }
                 break;
 
@@ -96,14 +88,5 @@ public class CounterBolt extends BaseRichBolt {
     @Override
     public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer) {
         outputFieldsDeclarer.declare(new Fields("item"));
-    }
-
-    public static void counter(Map<String, Integer> map, String value) {
-        if (!map.containsKey(value)) {
-            map.put(value, 1);
-        } else {
-            Integer c = map.get(value) + 1;
-            map.put(value, c);
-        }
     }
 }
