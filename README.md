@@ -19,6 +19,7 @@
 1. 数据读取
 `Storm`Spout读取`access.log`文件，将新产生的行记录提交给SpliteBolt。
 集群模式中数据读取由Kafka Producer做，Storm消费消息记录，Storm采用KafkaSpout与Kafka整合。
+> 最新更新数据获取思路 : 借用Apache Flume获取nginx日志，设置sources为 `exec / tail -F /var/log/access.log`，设置sink为kafka
 
 2. 数据存储
 storm将日志行记录划分成不同的块，其中包括ip地址块、访问时间块、访问请求信息块、访问状态码快、访问请求返回大小块、访问主机信息块。将每个块提交给CounterBolt。此外，在SpliteBolt中对行记录统计得到每天访问量等信息，存入Redis。
@@ -30,6 +31,48 @@ Storm CounterBolt对提交来的块做对应的统计处理，将处理结果存
 <p align="center">
 <image src="https://github.com/fenlan/Mycode/blob/master/images/nginxLog/nginxTop.png"></image>
 </p>
+
+最新更新思路，通过使用Apache Flume收集日志，正式实现实时统计
+<p align="center">
+<image src="https://github.com/fenlan/Mycode/blob/master/images/nginxLog/nginxLogFlume.png"></image>
+</p>
+
+## 使用Apache Flume收集日志
+Flume 简要图
+<p align="center">
+<image src="https://flume.apache.org/_images/DevGuide_image00.png"></image>
+</p>
+
+其中并未采用HDFS，而是用Kafka缓存，配置文件如下
+``` bash
+# Name the components on this agent
+a1.sources = r1
+a1.sinks = k1
+a1.channels = c1
+
+# Describe/configure the source
+a1.sources.r1.type = exec
+a1.sources.r1.command = tail -F /var/log/nginx/access.log
+
+# Describe the sink
+a1.sinks.k1.channel = c1
+a1.sinks.k1.type = org.apache.flume.sink.kafka.KafkaSink
+a1.sinks.k1.kafka.topic = test
+a1.sinks.k1.kafka.bootstrap.servers = localhost:9092
+a1.sinks.k1.kafka.flumeBatchSize = 2
+a1.sinks.k1.kafka.producer.acks = 1
+a1.sinks.k1.kafka.producer.linger.ms = 1
+a1.sinks.k1.kafka.producer.compression.type = snappy
+
+# Use a channel which buffers events in memory
+a1.channels.c1.type = memory
+a1.channels.c1.capacity = 1000
+a1.channels.c1.transactionCapacity = 100
+
+# Bind the source and sink to the channel
+a1.sources.r1.channels = c1
+a1.sinks.k1.channel = c1
+```
 
 ## Storm处理过程
 1. `storm`分块结果
@@ -170,4 +213,5 @@ jedis.hincrBy("http_user_agent_browser", browser, 1);
 - 有待增加Web前端展示，最近很忙，暂停更新。
 - 向Goaccess看齐，也极力推荐Goaccess。[https://goaccess.io/](https://goaccess.io/)，项目精小，功能相对全面，不知道是不是自己没仔细阅读它的文档，没有发现它借用数据库，因此数据很容易丢失。但这样的好处就是使项目不占用过多系统资源。
 - 很感谢美团面试官，给我提供了一个集群模式日志获取的解决思路
-- 最新更新结果 : 原来版本中所有的统计是在Java代码中进行的，在Java代码中设置一个计数器，记录下计数值，然后更新进Redis。改进的统计方式是利用Redis的自增操作，将数据保留在Redis数据库中，每次获取到记录，将记录对应Redis中Key的value自增。这样的好处是JVM中不再保留计数值，相对减少了项目的内存占用。
+- 更新结果 : 原来版本中所有的统计是在Java代码中进行的，在Java代码中设置一个计数器，记录下计数值，然后更新进Redis。改进的统计方式是利用Redis的自增操作，将数据保留在Redis数据库中，每次获取到记录，将记录对应Redis中Key的value自增。这样的好处是JVM中不再保留计数值，相对减少了项目的内存占用。
+- 最新更新 : 使用Apache Flume收集日志，实现source exec触发日志收集，采用`tail -F /var/log/nginx/access.log`命令输出结果作为收集源
