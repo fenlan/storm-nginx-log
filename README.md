@@ -184,6 +184,9 @@ jedis.hincrBy("http_user_agent_browser", browser, 1);
 - Redis 4+
 - IntelliJ IDEA-2017.2
 - Nginx
+- Storm集群
+- Kafka
+- Apache Flume
 
 ### 下载GeoLite2IP数据库
 日志分析客户端ip地址是使用GeoLite数据库查询ip所在城市，统计城市访问量。
